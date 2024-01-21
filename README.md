@@ -20,7 +20,7 @@ UVLTrack presents strong performance under different reference settings.
 | UVLTrack-L   |   **58.2/60.9**    |   **64.8/68.8**    |   **64.9/69.3**    |
 
 ## Checkpoints
-You can download the model weights and raw_result from [Google Drive](https://drive.google.com/drive/folders/1UZTrGcL3YlxvNpHi0wKsO_sKsTYuYnFo?usp=drive_link).
+You can download the model weights and raw_result from [Google Drive](https://drive.google.com/drive/folders/1UZTrGcL3YlxvNpHi0wKsO_sKsTYuYnFo?usp=sharing).
 
 |             Methods             |         UVLTrack-B       |       UVLTrack-L       |
 |:-------------------------------:|:------------------------:|:------------------------:|
@@ -83,7 +83,7 @@ Put the tracking datasets in ./data. It should look like:
    ```
 
 ## Train UVLTrack
-Download the pretrained [MAE](https://github.com/facebookresearch/mae) and [BERT](https://drive.google.com/drive/folders/1UZTrGcL3YlxvNpHi0wKsO_sKsTYuYnFo?usp=drive_link), put it under ```<PROJECT_ROOT>/pretrain```.
+Download the pretrained [MAE](https://github.com/facebookresearch/mae) and [BERT](https://drive.google.com/drive/folders/1UZTrGcL3YlxvNpHi0wKsO_sKsTYuYnFo?usp=sharing), put it under ```<PROJECT_ROOT>/pretrain```.
 
 Training with multiple GPUs using DDP.
 ```
@@ -92,7 +92,7 @@ sh scripts/train.sh uvltrack baseline_base
 ```
 
 ## Evaluation
-Download the model weight from [Google Drive](https://drive.google.com/drive/folders/1UZTrGcL3YlxvNpHi0wKsO_sKsTYuYnFo?usp=drive_link).
+Download the model weight from [Google Drive](https://drive.google.com/drive/folders/1UZTrGcL3YlxvNpHi0wKsO_sKsTYuYnFo?usp=sharing).
 
 Put the downloaded weights on ```<PROJECT_ROOT>/checkpoints/train/uvltrack/baseline_base``` and ```<PROJECT_ROOT>/checkpoints/train/uvltrack/baseline_large``` correspondingly.
 
