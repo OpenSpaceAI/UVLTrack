@@ -136,8 +136,15 @@ For questions about our paper or code, please contact [Yinchao Ma](imyc@mail.ust
 
 * We use the implementation of the ViT from the [Timm](https://github.com/huggingface/pytorch-image-models) repo and BERT from the [pytorch_pretrained_bert](https://github.com/Meelfy/pytorch_pretrained_BERT).
 
-<!-- ## Citation
+## Citation
 If our work is useful for your research, please consider cite:
 ```
-xxx
-``` -->
+@misc{ma2024unifying,
+      title={Unifying Visual and Vision-Language Tracking via Contrastive Learning}, 
+      author={Yinchao Ma and Yuyang Tang and Wenfei Yang and Tianzhu Zhang and Jinpeng Zhang and Mengxue Kang},
+      year={2024},
+      eprint={2401.11228},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+```
