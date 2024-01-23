@@ -1,6 +1,6 @@
 # UVLTrack
 
-The official implementation of our AAAI 2024 paper [**Unifying Visual and Vision-Language Tracking via Contrastive Learning**]()
+The official implementation of our AAAI 2024 paper [**Unifying Visual and Vision-Language Tracking via Contrastive Learning**](https://arxiv.org/abs/2401.11228)
 ![](arch.png)
 
 
