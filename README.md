@@ -20,7 +20,7 @@ UVLTrack presents strong performance under different reference settings.
 | UVLTrack-L   |   **58.2/60.9**    |   **64.8/68.8**    |   **64.9/69.3**    |
 
 ## Checkpoints
-You can download the model weights and raw_result from [Google Drive](https://drive.google.com/drive/folders/1UZTrGcL3YlxvNpHi0wKsO_sKsTYuYnFo?usp=sharing).
+You can download the model weights and raw_result from [Google Drive](https://drive.google.com/drive/folders/1UZTrGcL3YlxvNpHi0wKsO_sKsTYuYnFo?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1xSRgHHZKv8MyqMKwtT_JsA?pwd=8v0p).
 
 |             Methods             |         UVLTrack-B       |       UVLTrack-L       |
 |:-------------------------------:|:------------------------:|:------------------------:|
@@ -92,7 +92,7 @@ sh scripts/train.sh uvltrack baseline_base
 ```
 
 ## Evaluation
-Download the model weight from [Google Drive](https://drive.google.com/drive/folders/1UZTrGcL3YlxvNpHi0wKsO_sKsTYuYnFo?usp=sharing).
+Download the model weight from [Google Drive](https://drive.google.com/drive/folders/1UZTrGcL3YlxvNpHi0wKsO_sKsTYuYnFo?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1xSRgHHZKv8MyqMKwtT_JsA?pwd=8v0p).
 
 Put the downloaded weights on ```<PROJECT_ROOT>/checkpoints/train/uvltrack/baseline_base``` and ```<PROJECT_ROOT>/checkpoints/train/uvltrack/baseline_large``` correspondingly.
 
