@@ -1,7 +1,7 @@
 # UVLTrack
 
 The official implementation of our AAAI 2024 paper [**Unifying Visual and Vision-Language Tracking via Contrastive Learning**](https://arxiv.org/abs/2401.11228)
-![](arch.png)
+![](fig/arch.png)
 
 
 ## Brief Introduction
@@ -18,6 +18,9 @@ UVLTrack presents strong performance under different reference settings.
 | JointNLT  | 54.6/55.0 | -/- | 56.9/58.1 |
 | UVLTrack-B   |   **55.7/57.2**    |   **62.7/65.4**    |   **63.1/66.7**    |
 | UVLTrack-L   |   **58.2/60.9**    |   **64.8/68.8**    |   **64.9/69.3**    |
+
+
+![](fig/results.png)
 
 ## Checkpoints
 You can download the model weights and raw_result from [Google Drive](https://drive.google.com/drive/folders/1UZTrGcL3YlxvNpHi0wKsO_sKsTYuYnFo?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1xSRgHHZKv8MyqMKwtT_JsA?pwd=8v0p).
