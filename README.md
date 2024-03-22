@@ -8,7 +8,7 @@ The official implementation of our AAAI 2024 paper [**Unifying Visual and Vision
 Single object tracking aims to locate the target object in a video sequence according to the state specified by different modal references, including the initial bounding box (BBOX), natural language (NL), or both (NL+BBOX). Different previous modality-specific trackers, we present a unified tracker called UVLTrack, which can simultaneously handle all three reference settings (BBOX, NL, NL+BBOX) with the same parameters, allowing wider appliation scenarios. The proposed UVLTrack enjoys several merits. First, we design a modality-unified feature extractor for joint visual and language feature learning and propose a multi-modal contrastive loss to align the visual and language features into a unified semantic space. Second, a modality-adaptive box head is proposed, which makes full use of the target reference to mine ever-changing scenario features dynamically from video contexts and distinguish the target in a contrastive way, enabling robust performance in different reference settings.
 
 ## Strong Performance
-UVLTrack presents strong performance under different reference settings.
+UVLTrack presents strong performance under different reference settings. 
 |        Reference Modality       |       NL       |       BBOX       |       NL+BBOX       |
 |:--------------:|:---------:|:---------:|:---------:|
 | Methods      | TNL2K (AUC / P)      | TNL2K(AUC / P)     | TNL2K(AUC / P)     |
@@ -19,11 +19,12 @@ UVLTrack presents strong performance under different reference settings.
 | UVLTrack-B   |   **55.7/57.2**    |   **62.7/65.4**    |   **63.1/66.7**    |
 | UVLTrack-L   |   **58.2/60.9**    |   **64.8/68.8**    |   **64.9/69.3**    |
 
+Raw results can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1UZTrGcL3YlxvNpHi0wKsO_sKsTYuYnFo?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1xSRgHHZKv8MyqMKwtT_JsA?pwd=8v0p).
 
 ![](fig/results.png)
 
 ## Checkpoints
-You can download the model weights and raw_result from [Google Drive](https://drive.google.com/drive/folders/1UZTrGcL3YlxvNpHi0wKsO_sKsTYuYnFo?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1xSRgHHZKv8MyqMKwtT_JsA?pwd=8v0p).
+You can download the model weights from [Google Drive](https://drive.google.com/drive/folders/1UZTrGcL3YlxvNpHi0wKsO_sKsTYuYnFo?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1xSRgHHZKv8MyqMKwtT_JsA?pwd=8v0p).
 
 |             Methods             |         UVLTrack-B       |       UVLTrack-L       |
 |:-------------------------------:|:------------------------:|:------------------------:|
