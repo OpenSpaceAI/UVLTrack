@@ -100,7 +100,7 @@ class ModalityAdaptiveBoxHead(nn.Module):
         token_group = torch.cat([vis_token, txt_token, (vis_token+txt_token)/2], dim=1)
         bid = torch.arange(flag.shape[0])
         token = token_group[bid, flag]
-        prompt = self.image_tokenlize(out_dict['template'], out_dict['template_mask'], 
+        prompt = self.prompter(out_dict['template'], out_dict['template_mask'], 
                                 out_dict['search'], out_dict['context_mask'], 
                                 token, out_dict['flag'])
         return prompt
@@ -129,7 +129,7 @@ class ModalityAdaptiveBoxHead(nn.Module):
             token = token_group[bid, flag]
             search = out_dict['search']
             context = torch.cat([search[bid.shape[0]//2:], search[:bid.shape[0]//2]], dim=0)
-            prompt = self.image_tokenlize(out_dict['template'], out_dict['template_mask'], context, out_dict['context_mask'], token, out_dict['flag']) # b, 2, c
+            prompt = self.prompter(out_dict['template'], out_dict['template_mask'], context, out_dict['context_mask'], token, out_dict['flag']) # b, 2, c
             cont_score = self.logit_scale.exp() * (F.normalize(out_dict['search'], dim=-1) @ F.normalize(prompt, dim=-1).transpose(-2,-1))
             if self.softmax_one:
                 ext_one = torch.zeros_like(cont_score[:, :, :1])
