@@ -49,7 +49,7 @@ class ModalityAdaptiveBoxHead(nn.Module):
                                         conv(channel // 4, channel // 8),
                                         nn.Conv2d(channel // 8, 2, kernel_size=1))
 
-        self.image_tokenlize = DistributionBasedCrossAttention(inplanes, drop_rate=drop_rate)
+        self.prompter = DistributionBasedCrossAttention(inplanes, drop_rate=drop_rate)
         self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
         x, y = torch.arange(0, self.feat_sz), torch.arange(0, self.feat_sz)
         x, y = torch.meshgrid(x, y)
