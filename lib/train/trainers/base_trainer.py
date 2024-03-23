@@ -92,7 +92,7 @@ class BaseTrainer:
                             self.lr_scheduler.step(epoch - 1)
                     # only save the last 10 checkpoints
                     save_every_epoch = getattr(self.settings, "save_every_epoch", False)
-                    if epoch > (max_epochs - 10) or save_every_epoch or epoch % 5 == 0:
+                    if epoch > (max_epochs - 10) or save_every_epoch or epoch % 20 == 0:
                         if self._checkpoint_dir:
                             if self.settings.local_rank in [-1, 0]:
                                 self.save_checkpoint()

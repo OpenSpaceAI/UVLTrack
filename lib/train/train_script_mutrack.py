@@ -48,7 +48,7 @@ def run(settings):
     else:
         settings.device = torch.device("cuda:0")
         
-    settings.save_every_epoch = True
+    # settings.save_every_epoch = True
     actor = registry.ACTORS[settings.script_name](net, cfg)
 
     # Optimizer, parameters, and learning rates
