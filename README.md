@@ -79,6 +79,7 @@ Put the tracking datasets in ./data. It should look like:
             |-- OTB_videos
         -- refcocog
             |-- refcocog
+            |-- split # download this folder from VLTVG (https://github.com/yangli18/VLTVG/blob/master/docs/get_started.md)
             |-- train2014 # coco 2014
             |-- val2014 # coco 2014
         -- tnl2k
