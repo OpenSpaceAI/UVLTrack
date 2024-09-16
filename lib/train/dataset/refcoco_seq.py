@@ -68,8 +68,8 @@ class RefCOCOSeq(BaseVideoDataset):
         return seq_list
 
     def get_split_info(self, dataset):
-        # setting datasource
-        self.split_root = '/ssd/myc/VL_project/VLTVG/split/data'
+        # setting datasource, please refer to https://github.com/yangli18/VLTVG/blob/master/docs/get_started.md
+        self.split_root = os.path.join(self.root, 'split/data')
         split = self.split
         im_dir = osp.join(self.root, 'train2014')
 
