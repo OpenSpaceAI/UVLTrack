@@ -1,0 +1,110 @@
+DATA:
+  CONTEXT_GAP: 20
+  MAX_SAMPLE_INTERVAL: 200
+  MEAN:
+  - 0.485
+  - 0.456
+  - 0.406
+  SEARCH:
+    CENTER_JITTER: 3.5
+    FACTOR: 4.0
+    SCALE_JITTER: 0.5
+    SIZE: 384
+    NUMBER: 2
+  STD:
+  - 0.229
+  - 0.224
+  - 0.225
+  TEMPLATE:
+    CENTER_JITTER: 0
+    FACTOR: 2.0
+    SCALE_JITTER: 0
+    SIZE: 128
+    NUMBER: 1
+  TRAIN:
+    DATASETS_NAME:
+    - REFCOCOG
+    DATASETS_RATIO:
+    - 1
+    SAMPLE_PER_EPOCH: 30000
+  VAL:
+    DATASETS_NAME: # []
+    - REFCOCOG_val
+  VALTRACK:
+    DATASETS_NAME:
+    - LASOT_test
+    - LASOTEXT
+    - OTB99_test
+    - TNL2K_test
+    DATASETS_RATIO:
+    - 1
+    - 1
+    - 1
+    - 1
+    SAMPLE_PER_EPOCH: 6400
+  VALVL:
+    DATASETS_NAME:
+    - LASOT_test
+    - LASOTEXT
+    - OTB99_test
+    - TNL2K_test
+    DATASETS_RATIO:
+    - 1
+    - 1
+    - 1
+    - 1
+    SAMPLE_PER_EPOCH: 6400
+MODEL:
+  BACKBONE:
+    FUSION_LAYER: [6,7,8,9,10,11]
+    TYPE: modality_unified_feature_extractor
+    PRETRAINED_PATH: 'pretrain/mae_pretrain_vit_base.pth'
+    CONT_LOSS_LAYER: [3,4,5,6,7,8,9,10,11]
+    TXT_TOKEN_MODE: 'cls'
+    LANGUAGE:
+      TYPE: 'pretrain/bert'
+      PATH: 'pretrain/bert/bert-base-uncased.tar.gz'
+      VOCAB_PATH: 'pretrain/bert/bert-base-uncased-vocab.txt'
+  HEAD:
+    HEAD_DIM: 256
+    TYPE: modality_adaptive_box_head
+    OFFSET_SIGMOID: true
+    CLS_TOKENIZE: false
+    JOINT_CLS: false
+    SOFTMAX_ONE: true
+  HIDDEN_DIM: 768
+  POSITION_EMBEDDING: sine
+TRAIN:
+  MODE: grounding
+  GROUNDING_RATIO: 0.11
+  VL_RATIO: 0.44
+  BACKBONE_MULTIPLIER: 0.1
+  BATCH_SIZE: 16
+  EPOCH: 100
+  GIOU_WEIGHT: 2.0
+  GRAD_CLIP_NORM: 0.1
+  L1_WEIGHT: 5.0
+  AUX_WEIGHT: 0.1
+  CONT_WEIGHT: 1.0
+  CIB_WEIGHT: 0.01
+  CTR_RATIO: 0.75
+  LR: 0.0004
+  NUM_WORKER: 10
+  OPTIMIZER: ADAMW
+  PRINT_INTERVAL: 50
+  SCHEDULER:
+    TYPE: CosineAnnealingLR
+    DECAY_RATE: 0.1
+  VAL_EPOCH_INTERVAL: 1
+  WEIGHT_DECAY: 0.0001
+  DYNAMIC_CLS: true
+  REDUCTION: mean
+  GAUSSIAN_IOU: 0.7
+TEST:
+  MODE: 'NLBBOX'
+  EPOCH: 300
+  SEARCH_FACTOR: 4.0
+  SEARCH_SIZE: 256
+  TEMPLATE_FACTOR: 2.0
+  TEMPLATE_SIZE: 128
+  UPDATE_INTERVAL: 20
