@@ -374,8 +374,8 @@ def grounding_resize(im, output_sz, bbox, phrase, mask=None, aug_translate=True,
     # img2 = cv2.rectangle(deepcopy(im), (int(x11), int(y11)), (int(x21), int(y21)), (255, 0, 0), 1)
     # plt.imsave("debug/image_ori.png", img2)
 
-    #exclude_words = [2187, 2157, 2327, 3953, 2690] # ['left', 'right', 'top', 'bottom', 'middle'] # [2187, 2157, 2327, 3953, 2690]
-    exclude_words = [1823, 1155, 1253, 5931, 3694]
+    exclude_words = [2187, 2157, 2327, 3953, 2690] # ['left', 'right', 'top', 'bottom', 'middle'] # [2187, 2157, 2327, 3953, 2690]
+    #exclude_words = [1823, 1155, 1253, 5931, 3694]
     p = 0.5
     done = 1
 
