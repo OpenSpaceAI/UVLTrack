@@ -3,6 +3,7 @@ import torchvision.transforms as transforms
 from lib.utils import TensorDict
 import lib.train.data.processing_utils as prutils
 import lib.train.data.processing_utils_grounding as prutils_grounding
+import lib.train.data.processing_utils_grounding2 as prutils_grounding2
 import torch.nn.functional as F
 import random
 import numpy as np
@@ -198,28 +199,64 @@ class TrackProcessing(BaseProcessing):
         """
         has_search = data.get('search_images', None) is not None
         has_direction = self.has_directions(data['text'])
-
-        # For grounding image
+        # for grounding image
         if has_search:
-            grounding_resize = [prutils_grounding.grounding_resize(im, self.output_sz['grounding'], box, data['text'][0])
+            grounding_resize = [prutils_grounding2.grounding_resize(im, self.output_sz['grounding'], box, data['text'][0])
                                 for im, box in zip(data['grounding_images'], data['grounding_anno'])]
-            resize_grounding_frames, resize_grounding_box, grounding_att_mask, _, _, phrase_grounding = zip(*grounding_resize)
-            
-            search_resize = [prutils_grounding.grounding_resize(im, self.output_sz['search'], box, data['text'][0])
-                                for im, box in zip(data['search_images'], data['search_anno'])]
-            resize_search_frames, resize_search_box, search_att_mask, _, _, phrase_search = zip(*search_resize)
-            data['text'] = phrase_grounding+phrase_search
+            resize_grounding_frames, resize_grounding_box, grounding_att_mask, _, _, phrase_grounding = zip(
+                *grounding_resize)
+
+            # Apply joint transforms
+            if self.transform['joint'] is not None:
+                data['search_images'], data['search_anno'] = self.transform['joint'](image=data['search_images'],
+                                                                                     bbox=data['search_anno'])
+            for s in ['search']:
+                assert self.mode == 'sequence' or len(data[s + '_images']) == 1, \
+                    "In pair mode, num train/test frames must be 1"
+                # Add a uniform noise to the center pos - noise term 抖动box
+                jittered_anno = [self._get_jittered_box(a, s) for a in data[s + '_anno']]
+                # get template box and search box
+                # 2021.1.9 Check whether data is valid. Avoid too small bounding boxes
+                w, h = torch.stack(jittered_anno, dim=0)[:, 2], torch.stack(jittered_anno, dim=0)[:, 3]
+                crop_sz = torch.ceil(torch.sqrt(w * h) * self.search_area_factor[s])
+                if (crop_sz < 1).any():
+                    data['valid'] = False
+                    # print("Too small box is found. Replace it with new data.")
+                    return data
+                # Crop image region centered at jittered_anno box and get the attention mask
+                crops, boxes, att_mask, _ = prutils.jittered_center_crop(data[s + '_images'], jittered_anno,
+                                                                         data[s + '_anno'],
+                                                                         self.search_area_factor[s],
+                                                                         self.output_sz[s],
+                                                                         masks=None)
+
+                # debug
+                # box = boxes[0]
+                # im = crops[0]
+                # #x1, y1, x2, y2 = box[0], box[1], box[2], box[3]
+                # #img1 = cv2.rectangle(im, (int(x1), int(y1)), (int(x2), int(y2)), (255, 0, 0), 1)
+                # plt.imshow(im)
+                # plt.show()
+
+                # Apply transforms
+                data[s + '_images'], data[s + '_anno'], data[s + '_att'] = self.transform[s](image=crops, bbox=boxes,
+                                                                                             att=att_mask, joint=False)
+                # Note that type of data[s + '_att'] is tuple, type of ele is torch.tensor
+
+            data['text'] = phrase_grounding * 2
             data['grounding_images'], data['grounding_anno'], data['grounding_att'] = \
-                self.transform['grounding'](image=resize_grounding_frames, bbox=resize_grounding_box, att=grounding_att_mask, joint=False)
-            data['search_images'], data['search_anno'], data['search_att'] = \
-                self.transform['grounding'](image=resize_search_frames, bbox=resize_search_box, att=search_att_mask, joint=False)
+                self.transform['grounding'](image=resize_grounding_frames, bbox=resize_grounding_box,
+                                            att=grounding_att_mask, joint=False)
+            # data['search_images'], data['search_anno'], data['search_att'] = \
+            #     self.transform['grounding'](image=resize_search_frames, bbox=resize_search_box, att=search_att_mask, joint=False)
         else:
             grounding_resize = [prutils.grounding_resize(im, self.output_sz['grounding'], box)
                                 for im, box in zip(data['grounding_images'], data['grounding_anno'])]
             resize_grounding_frames, resize_grounding_box, grounding_att_mask, _, _ = zip(*grounding_resize)
             data['grounding_images'], data['grounding_anno'], data['grounding_att'] = \
-                self.transform['grounding'](image=resize_grounding_frames, bbox=resize_grounding_box, att=grounding_att_mask, joint=False)
-        
+                self.transform['grounding'](image=resize_grounding_frames, bbox=resize_grounding_box,
+                                            att=grounding_att_mask, joint=False)
+
         iter_list = ['search', 'grounding'] if has_search else ['grounding']
         for s in iter_list:
             for ele in data[s + '_att']:
@@ -227,25 +264,36 @@ class TrackProcessing(BaseProcessing):
                     data['valid'] = False
                     print("Values of original attention mask are all one. Replace it with new data.")
                     return data
+            # 2021.1.10 more strict conditions: require the donwsampled masks not to be all 1
             feat_size = self.output_sz[s] // 16  # 16 is the backbone stride
             for ele in data[s + '_att']:
+                # (1,1,128,128) (1,1,256,256) --> (1,1,8,8) (1,1,16,16)
                 mask_down = F.interpolate(ele[None, None].float(), size=feat_size).to(torch.bool)[0]
                 if (mask_down == 1).all():
                     data['valid'] = False
                     print("Values of down-sampled attention mask are all one. Replace it with new data.")
                     return data
             del data[s + '_att']
-            data[s + '_cls'] = prutils.generate_cls_label(data[s + '_anno'], gaussian_iou=self.gaussian_iou, out_size=feat_size, dynamic=self.dynamic_cls)
+            data[s + '_cls'] = prutils.generate_cls_label(data[s + '_anno'], gaussian_iou=self.gaussian_iou,
+                                                          out_size=feat_size, dynamic=self.dynamic_cls)
 
         if not has_search:
             data['search_images'] = data['grounding_images']
             data['search_anno'] = data['grounding_anno']
             data['search_cls'] = data['grounding_cls']
         else:
+            if has_direction:
+                data['search_images'] = data['grounding_images']
+                data['search_anno'] = data['grounding_anno']
+                data['search_cls'] = data['grounding_cls']
             data['search_images'] = (data['grounding_images'] + data['search_images'])
             data['search_anno'] = (data['grounding_anno'] + data['search_anno'])
             data['search_cls'] = (data['grounding_cls'] + data['search_cls'])
-            
+        # else:
+        #     data['search_images'] = (data['grounding_images'] + data['grounding_images'])
+        #     data['search_anno'] = (data['grounding_anno'] + data['grounding_anno'])
+        #     data['search_cls'] = (data['grounding_cls'] + data['grounding_cls'])
+
         data['template_images'] = [torch.zeros([3, self.output_sz['template'], self.output_sz['template']])]
         data['template_anno'] = [torch.zeros([4])]
         del data['grounding_images']
@@ -259,3 +307,66 @@ class TrackProcessing(BaseProcessing):
         else:
             data = data.apply(lambda x: x[0] if isinstance(x, list) else x)
         return data
+        # has_search = data.get('search_images', None) is not None
+        # has_direction = self.has_directions(data['text'])
+        #
+        # # For grounding image
+        # if has_search:
+        #     grounding_resize = [prutils_grounding.grounding_resize(im, self.output_sz['grounding'], box, data['text'][0])
+        #                         for im, box in zip(data['grounding_images'], data['grounding_anno'])]
+        #     resize_grounding_frames, resize_grounding_box, grounding_att_mask, _, _, phrase_grounding = zip(*grounding_resize)
+        #
+        #     search_resize = [prutils_grounding.grounding_resize(im, self.output_sz['search'], box, data['text'][0])
+        #                         for im, box in zip(data['search_images'], data['search_anno'])]
+        #     resize_search_frames, resize_search_box, search_att_mask, _, _, phrase_search = zip(*search_resize)
+        #     data['text'] = phrase_grounding+phrase_search
+        #     data['grounding_images'], data['grounding_anno'], data['grounding_att'] = \
+        #         self.transform['grounding'](image=resize_grounding_frames, bbox=resize_grounding_box, att=grounding_att_mask, joint=False)
+        #     data['search_images'], data['search_anno'], data['search_att'] = \
+        #         self.transform['grounding'](image=resize_search_frames, bbox=resize_search_box, att=search_att_mask, joint=False)
+        # else:
+        #     grounding_resize = [prutils.grounding_resize(im, self.output_sz['grounding'], box)
+        #                         for im, box in zip(data['grounding_images'], data['grounding_anno'])]
+        #     resize_grounding_frames, resize_grounding_box, grounding_att_mask, _, _ = zip(*grounding_resize)
+        #     data['grounding_images'], data['grounding_anno'], data['grounding_att'] = \
+        #         self.transform['grounding'](image=resize_grounding_frames, bbox=resize_grounding_box, att=grounding_att_mask, joint=False)
+        #
+        # iter_list = ['search', 'grounding'] if has_search else ['grounding']
+        # for s in iter_list:
+        #     for ele in data[s + '_att']:
+        #         if (ele == 1).all():
+        #             data['valid'] = False
+        #             print("Values of original attention mask are all one. Replace it with new data.")
+        #             return data
+        #     feat_size = self.output_sz[s] // 16  # 16 is the backbone stride
+        #     for ele in data[s + '_att']:
+        #         mask_down = F.interpolate(ele[None, None].float(), size=feat_size).to(torch.bool)[0]
+        #         if (mask_down == 1).all():
+        #             data['valid'] = False
+        #             print("Values of down-sampled attention mask are all one. Replace it with new data.")
+        #             return data
+        #     del data[s + '_att']
+        #     data[s + '_cls'] = prutils.generate_cls_label(data[s + '_anno'], gaussian_iou=self.gaussian_iou, out_size=feat_size, dynamic=self.dynamic_cls)
+        #
+        # if not has_search:
+        #     data['search_images'] = data['grounding_images']
+        #     data['search_anno'] = data['grounding_anno']
+        #     data['search_cls'] = data['grounding_cls']
+        # else:
+        #     data['search_images'] = (data['grounding_images'] + data['search_images'])
+        #     data['search_anno'] = (data['grounding_anno'] + data['search_anno'])
+        #     data['search_cls'] = (data['grounding_cls'] + data['search_cls'])
+        #
+        # data['template_images'] = [torch.zeros([3, self.output_sz['template'], self.output_sz['template']])]
+        # data['template_anno'] = [torch.zeros([4])]
+        # del data['grounding_images']
+        # del data['grounding_anno']
+        # del data['grounding_cls']
+        #
+        # data['valid'] = True
+        # # Prepare output
+        # if self.mode == 'sequence':
+        #     data = data.apply(stack_tensors)
+        # else:
+        #     data = data.apply(lambda x: x[0] if isinstance(x, list) else x)
+        # return data
